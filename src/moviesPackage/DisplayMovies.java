@@ -1,6 +1,8 @@
 package moviesPackage;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -12,41 +14,44 @@ public class DisplayMovies {
 	}
 
 	private static void input() {
-		Movie movie1 = new Movie("Borat", "Comedy");
+		Movie movie1 = new Movie("borat", "Comedy");
 		Movie movie2 = new Movie("Dredd", "Action");
-		movie2.setCategory("Scifi");
 		Movie movie3= new Movie("Mad Max: Fury Road", "Action");
 		Movie movie4 = new Movie("They Came Together", "Comedy");
 		Movie movie5 = new Movie("One Flew Over the Cuckoo's Nest", "Drama");
 		Movie movie6 = new Movie("Hook", "Adventure");
-		movie6.setCategory("Drama");
 		Movie movie7 = new Movie("Vertigo", "Drama");
-		movie7.setCategory("Suspense");
 		Movie movie8 = new Movie("The Departed", "Drama");
 		Movie movie9 = new Movie("The Princess Bride", "Drama");
-		movie9.setCategory("Comedy");
 		Movie movie10 = new Movie("Adaption", "Drama");
 		Movie movie11 = new Movie("Drag Me To Hell", "Horror");
-		movie11.setCategory("Comedy");
 		Movie movie12 = new Movie("SpongeBob Squareparnts: The Movie", "Children");
-		movie12.setCategory("Comedy");
-		movie12.setCategory("Animated");
-		Movie[] moviesArray = {movie1, movie2, movie3, movie4, movie5, movie6, movie7, movie8, movie9, movie10, movie11, movie12, };
+		Movie movie13 = new Movie("The Room", "Drama");
+		Movie movie14 = new Movie("Room", "Drama");
+		Movie[] moviesArray = {movie1, movie2, movie3, movie4, movie5, movie6, movie7, movie8, movie9, movie10, movie11, movie12, movie13, movie14 };
 		List<Movie> moviesList = new ArrayList<>();
+		// This for loop adds movies that I thought of.
 		for (int i = 0; i < moviesArray.length; i++) {
 			moviesList.add(moviesArray[i]);
 		}
-		getCategories(moviesList);
+		// This for loop adds movies from the Grand Circus Github page
+		for (int i = 1 ; i < 101; i++) {
+			
+			moviesList.add(MoviesIO.getMovie(i));
+		}
+		for (int i = 0; i < moviesList.size(); i++) {
+		moviesList.get(i).setCategory((moviesList.get(i).getCategory().substring(0, 1).toUpperCase() + moviesList.get(i).getCategory().substring(1)));
+		}
+		
+		getAllCategories(moviesList);
 	}
-
-	private static void getCategories(List<Movie> moviesList) {
+	
+	private static void getAllCategories(List<Movie> moviesList) {
 		Scanner sc = new Scanner(System.in);
 		HashSet<String> categories = new HashSet<>();
 		for (int i = 0; i < moviesList.size(); i++) {
-			List<String> temp = moviesList.get(i).getCategory();
-			for (int j = 0; j < temp.size(); j++) {
-				categories.add(temp.get(j));
-			}
+			String temp = moviesList.get(i).getCategory();
+				categories.add(temp.substring(0,1).toUpperCase() + temp.substring(1) );
 		}
 		getUserPrompt(sc, moviesList, categories);
 	}
@@ -55,8 +60,22 @@ public class DisplayMovies {
 		System.out.println("Pick a movie from the following categories:");
 		displayCategories(categories);
 		String answer = sc.nextLine();
-		displayMovies(sc, moviesList, categories, answer);
+		if (validateCategories(answer, moviesList, categories)) {
+			displayMovies(sc, moviesList, categories, answer);
+		} else {
+			System.out.println("You failed");
+			getUserPrompt(sc, moviesList, categories);
+		}
 		askToContinue(sc, moviesList, categories);
+	}
+
+	private static boolean validateCategories(String answer, List<Movie> moviesList, HashSet<String> categories ) {
+		for (String cat : categories) {
+			if (cat.equals(answer)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static void askToContinue(Scanner sc, List<Movie> moviesList, HashSet<String> categories) {
@@ -66,23 +85,61 @@ public class DisplayMovies {
 		if (answer.matches("[yY][eE]*[sS]*")) {
 			getUserPrompt(sc, moviesList, categories);
 		}
-		
+		else if (answer.matches("[nN][oO]*")){
+			System.out.println("It's been real");
+		} else {
+			System.out.println("Huh?");
+			askToContinue(sc, moviesList, categories);
+		}	
 	}
 
+	
 	private static void displayMovies(Scanner sc, List<Movie> moviesList, HashSet<String> categories, String answer) {
-		HashSet<String> moviesInSelectedCategory = new HashSet<>();
+		// By using a TreeSet I can 
+		System.out.println(moviesList.get(19).getTitle());
+		ArrayList<String> moviesInSelectedCategory = new ArrayList<>();
 		for (int i = 0; i < moviesList.size(); i++) {
-			List<String> temp = moviesList.get(i).getCategory();
-			for (int j = 0; j < temp.size(); j++) {
-				if (temp.get(j).matches(answer)) {
+			String temp = moviesList.get(i).getCategory();
+				if (temp.matches(answer)) {
 					moviesInSelectedCategory.add(moviesList.get(i).getTitle());
 				}
 			}
-		}
+		
+		Collections.sort(moviesInSelectedCategory); 
+		ArrayList<String> copy = moviesInSelectedCategory; 
+		ArrayList<String> secondCopy = takeOutThe(copy);
+		Collections.sort(secondCopy);
+		ArrayList<String> thirdCopy = addTheBack(secondCopy, copy);
 		System.out.println("Here are all the movies in the " + answer + " category.");
-		for (String movie : moviesInSelectedCategory) {
+		for (String movie : secondCopy) {
 		System.out.println(movie);
 		}
+	}
+
+	private static ArrayList<String> addTheBack(ArrayList<String> secondCopy, ArrayList<String> copy) {
+		ArrayList<String> thirdCopy = new ArrayList<>();
+		for (int i = 0; i < secondCopy.size(); i++) {
+			for (int j = 0; j < secondCopy.size(); j++) {
+				if (copy.get(i).substring(4).equals(secondCopy.get(j))){
+					secondCopy.set(j, "The " + secondCopy.get(j));
+				}
+			}
+		}
+		
+		return secondCopy;
+	}
+
+	private static ArrayList<String> takeOutThe(ArrayList<String> movies) {
+		ArrayList<String> copy = new ArrayList<>();
+		for (String movie : movies) {
+			if (movie.startsWith("The ")) {
+				copy.add(movie.substring(4));
+			}
+			else {
+				copy.add(movie);
+			}
+		}
+		return copy;
 	}
 
 	private static void displayCategories(HashSet<String> categories) {
@@ -90,5 +147,6 @@ public class DisplayMovies {
 			System.out.println(cat);
 		}
 	}	
+	
 	
 }
