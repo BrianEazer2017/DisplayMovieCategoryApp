@@ -6,14 +6,14 @@ import java.util.List;
 public class Movie {
 
 	private String title;
-	private List<String> category = new ArrayList<>();
+	private String category;
 	
 	public Movie() {
 		
 	}
 	public Movie(String title, String category) {
 		this.title = title;
-		this.category.add(category);
+		this.category = category;
 	}
 	public String getTitle() {
 		return title;
@@ -21,11 +21,11 @@ public class Movie {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public List<String> getCategory() {
+	public String getCategory() {
 		return category;
 	}
 	public void setCategory(String category) {
-		this.category.add(category);
+		this.category = category;
 	}
 
 }
