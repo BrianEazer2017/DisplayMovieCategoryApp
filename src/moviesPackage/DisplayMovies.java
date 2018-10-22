@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.TreeSet;
 
 public class DisplayMovies {
 
@@ -14,7 +15,7 @@ public class DisplayMovies {
 	}
 
 	private static void input() {
-		Movie movie1 = new Movie("borat", "Comedy");
+		Movie movie1 = new Movie("Borat", "Comedy");
 		Movie movie2 = new Movie("Dredd", "Action");
 		Movie movie3= new Movie("Mad Max: Fury Road", "Action");
 		Movie movie4 = new Movie("They Came Together", "Comedy");
@@ -27,8 +28,8 @@ public class DisplayMovies {
 		Movie movie11 = new Movie("Drag Me To Hell", "Horror");
 		Movie movie12 = new Movie("SpongeBob Squareparnts: The Movie", "Children");
 		Movie movie13 = new Movie("The Room", "Drama");
-		Movie movie14 = new Movie("Room", "Drama");
-		Movie[] moviesArray = {movie1, movie2, movie3, movie4, movie5, movie6, movie7, movie8, movie9, movie10, movie11, movie12, movie13, movie14 };
+		
+		Movie[] moviesArray = {movie1, movie2, movie3, movie4, movie5, movie6, movie7, movie8, movie9, movie10, movie11, movie12, movie13};
 		List<Movie> moviesList = new ArrayList<>();
 		// This for loop adds movies that I thought of.
 		for (int i = 0; i < moviesArray.length; i++) {
@@ -48,7 +49,7 @@ public class DisplayMovies {
 	
 	private static void getAllCategories(List<Movie> moviesList) {
 		Scanner sc = new Scanner(System.in);
-		HashSet<String> categories = new HashSet<>();
+		TreeSet<String> categories = new TreeSet<>();
 		for (int i = 0; i < moviesList.size(); i++) {
 			String temp = moviesList.get(i).getCategory();
 				categories.add(temp.substring(0,1).toUpperCase() + temp.substring(1) );
@@ -56,20 +57,32 @@ public class DisplayMovies {
 		getUserPrompt(sc, moviesList, categories);
 	}
 		
-	private static void getUserPrompt(Scanner sc, List<Movie> moviesList, HashSet<String> categories) {
+	private static void getUserPrompt(Scanner sc, List<Movie> moviesList, TreeSet<String> categories) {
 		System.out.println("Pick a movie from the following categories:");
 		displayCategories(categories);
-		String answer = sc.nextLine();
-		if (validateCategories(answer, moviesList, categories)) {
+		if (sc.hasNextInt()) {
+			int answer = sc.nextInt();
+			if (validateNumber(answer, categories)) {
+				displayMovies(sc, moviesList, categories, Integer.toString(answer));
+			} 
+			else {
+				System.out.println("Your number is out of range");
+				getUserPrompt(sc, moviesList, categories);
+			}
+		}
+		else if (sc.hasNext()) {
+			String answer = sc.next();
+			if (validateAnswer(answer, categories)) {
 			displayMovies(sc, moviesList, categories, answer);
-		} else {
+			} else {
 			System.out.println("You failed");
 			getUserPrompt(sc, moviesList, categories);
+		}
 		}
 		askToContinue(sc, moviesList, categories);
 	}
 
-	private static boolean validateCategories(String answer, List<Movie> moviesList, HashSet<String> categories ) {
+	private static boolean validateAnswer(String answer, TreeSet<String> categories) {
 		for (String cat : categories) {
 			if (cat.equals(answer)) {
 				return true;
@@ -78,9 +91,17 @@ public class DisplayMovies {
 		return false;
 	}
 
-	private static void askToContinue(Scanner sc, List<Movie> moviesList, HashSet<String> categories) {
+	private static boolean validateNumber(int answer, TreeSet<String> categories) {
+			if ((answer >= 1) && (answer <= 9)) {
+			return true;
+			}
+		return false;
+	}
+
+	private static void askToContinue(Scanner sc, List<Movie> moviesList, TreeSet<String> categories) {
 		System.out.println("");
 		System.out.println("Would you like to continue?");
+		sc.nextLine();
 		String answer = sc.nextLine();
 		if (answer.matches("[yY][eE]*[sS]*")) {
 			getUserPrompt(sc, moviesList, categories);
@@ -94,9 +115,16 @@ public class DisplayMovies {
 	}
 
 	
-	private static void displayMovies(Scanner sc, List<Movie> moviesList, HashSet<String> categories, String answer) {
-		// By using a TreeSet I can 
-		System.out.println(moviesList.get(19).getTitle());
+	private static void displayMovies(Scanner sc, List<Movie> moviesList, TreeSet<String> categories, String answer) {
+		try {
+		if ((Integer.parseInt(answer) >= 1) && (Integer.parseInt(answer) <= 9)) {
+			List<String> cats = new ArrayList<String> (categories);
+			answer = changeNumberToString(cats, answer);
+		} 
+		}
+		catch(NumberFormatException ex) {
+			
+		}
 		ArrayList<String> moviesInSelectedCategory = new ArrayList<>();
 		for (int i = 0; i < moviesList.size(); i++) {
 			String temp = moviesList.get(i).getCategory();
@@ -109,15 +137,21 @@ public class DisplayMovies {
 		ArrayList<String> copy = moviesInSelectedCategory; 
 		ArrayList<String> secondCopy = takeOutThe(copy);
 		Collections.sort(secondCopy);
-		ArrayList<String> thirdCopy = addTheBack(secondCopy, copy);
+		secondCopy = addTheBack(secondCopy, copy);
 		System.out.println("Here are all the movies in the " + answer + " category.");
 		for (String movie : secondCopy) {
 		System.out.println(movie);
 		}
 	}
 
+	private static String changeNumberToString(List<String> cats, String answer) {
+		String cat = "";
+		int index = Integer.parseInt(answer) - 1;
+		cat = cats.get(index);
+		return cat;
+	}
+
 	private static ArrayList<String> addTheBack(ArrayList<String> secondCopy, ArrayList<String> copy) {
-		ArrayList<String> thirdCopy = new ArrayList<>();
 		for (int i = 0; i < secondCopy.size(); i++) {
 			for (int j = 0; j < secondCopy.size(); j++) {
 				if (copy.get(i).substring(4).equals(secondCopy.get(j))){
@@ -142,9 +176,11 @@ public class DisplayMovies {
 		return copy;
 	}
 
-	private static void displayCategories(HashSet<String> categories) {
+	private static void displayCategories(TreeSet<String> categories) {
+		int count = 1;
 		for (String cat : categories) {
-			System.out.println(cat);
+			System.out.println(count + ". " + cat);
+			count++;
 		}
 	}	
 	
